@@ -34,29 +34,20 @@ print date
 date2str=str(date['d']).replace(':','-').replace(' ','-')
 
 url = "http://m.rozklady.mpk.krakow.pl/Data/rozklady-{0}.zip.zip".format(date2str)
-
 print url
 
-##r = requests.get(url, stream=True)
-#if not r.ok:
-#  print "fail to get DB!"
-#  quit()
-#
-#import zipfile, StringIO
-#
-#z = zipfile.ZipFile(StringIO.StringIO(r.content))
-#print z.extractall()
 
+import urllib2,os.path,zipfile,StringIO
 
-import urllib2
-import os.path
-
-fileName=date2str+".zip"
+fileName=date2str+".sql"
 
 if not os.path.isfile(fileName):
   response = urllib2.urlopen(url)
-  zipcontent= response.read()
-  with open(fileName, 'w') as f:
-    f.write(zipcontent)
+  if 200==response.getcode():
+    z = zipfile.ZipFile(StringIO.StringIO(response.read()))
+    zlist=z.namelist()
+    if len(zlist)==1:
+      with open(fileName, 'w') as f:
+       f.write(z.read(zlist[0]))
 
 print fileName+" - done"
